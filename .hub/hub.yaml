@@ -1,0 +1,185 @@
+version: 1
+kind: application
+meta:
+  name: 'kubeflow-pipeline:1'
+  brief: Kubeflow Pipeline end-to-end applicaiton
+  source:
+    dir: .
+requires:
+  - kubernetes
+outputs:
+  - name: application.notebook.url
+    value: '${component.kubeflow.url}_/notebooks'
+    brief: URL to the application jupyter notebook
+  - name: application.git.kind
+    value: '${component.git.kind}'
+    brief: Reference that application uses Github
+  - name: application.git.remote
+    value: '${component.git.remote}'
+    brief: URL to the git repository
+  - name: application.git.branch
+    value: '${component.git.branch}'
+    brief: Git branch that current application stack is using
+  - name: application.bucket.url
+    value: '${component.s3.url}'
+    brief: URL of a bucket that has been used to store application artifacts
+  - name: application.jupyter.kernel.image
+    value: '${application.jupyter.kernel.image}'
+templates:
+  files:
+    - templates/notebook-config.yaml.template
+    - templates/notebook-pvc.yaml.template
+    - templates/notebook.yaml.template
+    - templates/rbac.yaml.template
+    - templates/git-secret.yaml.template
+    - templates/bucket-pv-s3.yaml.template
+    - templates/notebook-keyring-s3.yaml.template
+lifecycle:
+  bare: allow
+  verbs:
+    - deploy
+    - undeploy
+  order:
+    - github-repository
+    - pull-secret
+    - s3-bucket
+    - aws-creds
+    - s3fuse
+parameters:
+  - name: dns.domain
+    env: KUBECONTEXT
+  - name: terraform.bucket.name
+  - name: terraform.bucket.region
+  - name: application.name
+    env: APPLICATION
+  - name: application.description
+    value: End-to-end Kubeflow pipeline
+  - name: application.workspace.dir
+    default: ../../../
+    fromEnv: WORKSPACE
+  - name: application.workspace.size
+    value: 10Gi
+  - name: application.workspace.uid
+    brief: stands for jovyan user
+    value: '1000'
+  - name: application.workspace.gid
+    brief: stands for jovyan  user primary group
+    value: '100'
+  - name: application.workspace.storageClass
+    value: default
+  - name: application.workspace.accessMode
+    value: ReadWriteOnce
+  - name: application.namespace
+    kind: user
+    value: kubeflow
+    env: NAMESPACE
+  - name: component.kubeflow.url
+  - name: component.kubeflow.namespace
+  - name: component.github.token
+    fromEnv: COMPONENT_GITHUB_TOKEN
+  - name: component.github.repository.organization
+  - name: component.github.repository.name
+  - name: component.github.repository.description
+    kind: link
+    value: '${application.description}'
+  - name: component.github.workspace
+    kind: link
+    value: '${application.workspace.dir}'
+  - name: component.git.kind
+    value: github
+  - name: component.git.remote
+  - name: component.git.username
+  - name: component.git.password
+  - name: component.git.branch
+  - name: component.git.secretName
+    kind: link
+    value: '${application.name}-github'
+  - kind: user
+    name: application.training.docker.registry.url
+  - kind: user
+    name: application.training.docker.auth.host
+  - kind: user
+    name: application.training.docker.auth.basic.username
+  - kind: user
+    name: application.training.docker.auth.basic.password
+    fromEnv: APPLICATION_TRAINING_DOCKER_AUTH_BASIC_PASSWORD
+  - kind: user
+    name: application.training.docker.registry.kind
+  - kind: link
+    name: component.pullSecret.name
+    value: '${application.name}-pullsecret'
+  - kind: link
+    name: component.pullSecret.namespace
+    value: '${application.namespace}'
+  - kind: link
+    name: component.docker.registry.kind
+    value: '${application.training.docker.registry.kind}'
+  - kind: link
+    name: component.docker.auth.host
+    value: '${application.training.docker.auth.host}'
+  - kind: link
+    name: component.docker.auth.basic.username
+    value: '${application.training.docker.auth.basic.username}'
+  - kind: link
+    name: component.docker.auth.basic.password
+    value: '${application.training.docker.auth.basic.password}'
+  - kind: user
+    name: application.bucket.name
+  - kind: user
+    name: application.bucket.region
+  - kind: user
+    name: application.bucket.pv.capacity
+    value: 600Gi
+  - name: cloud.region
+  - name: cloud.kind
+  - name: cloud.credential.source
+    value: Ec2InstanceMetadata
+  - name: cloud.credential.accessKey
+    empty: allow
+  - name: cloud.credential.secretKey
+    empty: allow
+  - name: cloud.credential.profile
+    value: default
+  - name: cloud.credential.kubernetes.secret.name
+    kind: link
+    value: '${application.name}-${application.bucket.name}-creds'
+  - name: cloud.credential.kubernetes.secret.namespace
+    kind: link
+    value: '${application.namespace}'
+  - name: component.ingress.protocol
+    value: https
+  - name: component.bucket.kind
+    value: s3
+    env: BUCKET_KIND
+  - name: component.bucket.name
+    kind: link
+    value: '${application.bucket.name}'
+  - name: component.bucket.acl
+    value: private
+  - name: component.bucket.region
+    value: '${application.bucket.region}'
+  - name: component.s3.url
+  - name: component.s3fuse.namespace
+    kind: link
+    value: '${application.namespace}'
+  - name: application.jupyter.kernel.image
+    value: 'docker.io/agilestacks/jupyter-tensorflow-ktext-seq2seq:latest'
+components:
+  - name: github-repository
+    source:
+      dir: components/github-repository
+  - name: pull-secret
+    source:
+      dir: components/pull-secret
+  - name: aws-creds
+    source:
+      dir: components/aws-creds
+  - name: s3-bucket
+    source:
+      dir: components/s3-bucket
+  - name: s3fuse
+    source:
+      dir: components/s3fs
+output:
+  - name: application.bucket.pv.capacity
+    value: '${application.bucket.pv.capacity}'

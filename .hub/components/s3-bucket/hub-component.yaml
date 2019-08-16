@@ -1,0 +1,44 @@
+---
+version: 1
+kind: component
+meta:
+  name: s3-bucket
+  source:
+    dir: .
+
+parameters:
+- name: terraform.bucket.name
+  env: STATE_BUCKET
+- name: terraform.bucket.region
+  env: STATE_REGION
+- name: cloud.region
+  env: AWS_DEFAULT_REGION
+- name: dns.domain
+  env:  DOMAIN_NAME
+- name: component.bucket
+  parameters:
+  - name: name
+    value: bucket.${dns.domain}
+    env: COMPONENT_NAME
+  - name: acl
+    value: private
+    env: ACL
+
+outputs:
+- name: component.s3.arn
+  fromTfVar: arn
+- name: component.s3.domain
+  fromTfVar: domain
+- name: component.s3.endpoint
+  fromTfVar: endpoint
+- name: component.s3.url
+  brief: URL to the AWS web console with bucket
+  fromTfVar: console_url
+- name: component.bucket.kind
+  value: s3
+- name: component.bucket.name
+  fromTfVar: bucket
+- name: component.bucket.endpoint
+  fromTfVar: endpoint
+- name: component.bucket.region
+  fromTfVar: region

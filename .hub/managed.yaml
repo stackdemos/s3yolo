@@ -1,0 +1,47 @@
+parameters:
+  - name: application.bucket.endpoint
+    value: 'https://s3.amazonaws.com/'
+  - name: application.bucket.name
+    value: files.ml3.demo05.superhub.io
+  - name: application.bucket.region
+    value: us-east-1
+  - name: application.description
+    value: Kubeflow pipeline
+  - name: application.name
+    value: s3yolo
+  - name: application.training.docker.auth.basic.username
+    value: admin
+  - name: application.training.docker.auth.host
+    value: ml3-harbor.svc.ml3.demo05.superhub.io
+  - name: application.training.docker.registry.image
+    value: ml3-harbor.svc.ml3.demo05.superhub.io/library/s3yolo
+  - name: application.training.docker.registry.kind
+    value: harbor
+  - name: application.training.docker.registry.url
+    value: ml3-harbor.svc.ml3.demo05.superhub.io/library
+  - name: component.dex.okta.appId
+    value: 0oa3qn3ro7BnRqvWV2p7
+  - name: component.dex.okta.clientId
+    value: 0oa3qn3ro7BnRqvWV2p7
+  - name: component.dex.okta.issuer
+    value: 'https://agilestacks.okta.com'
+  - name: component.github.repository.name
+    value: s3yolo
+  - name: component.github.repository.organization
+    value: stackdemos
+outputs:
+  - name: application.bucket.endpoint
+  - name: application.bucket.name
+  - name: application.bucket.region
+  - name: application.description
+  - name: application.name
+  - name: application.training.docker.auth.basic.username
+  - name: application.training.docker.auth.host
+  - name: application.training.docker.registry.image
+  - name: application.training.docker.registry.kind
+  - name: application.training.docker.registry.url
+  - name: component.dex.okta.appId
+  - name: component.dex.okta.clientId
+  - name: component.dex.okta.issuer
+  - name: component.github.repository.name
+  - name: component.github.repository.organization
